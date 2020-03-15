@@ -1,0 +1,8 @@
+streamlit
+pandas
+matplotlib
+Pillow
+xarray
+cfgrib
+eccodes-python
+scipy
