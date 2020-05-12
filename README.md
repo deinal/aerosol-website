@@ -1,6 +1,9 @@
 # aerosol-website
 Worldwide prediction of n100 concentrations based on carbon monoxide and temperature reanalysis data
 
+### Live at
+
+https://aerosol.herokuapp.com/
 
 ### Docker :whale:
 
@@ -17,3 +20,16 @@ $ gcloud config set project <project-name>
 $ gcloud app deploy
 $ gcloud app browse
 ```
+
+### Heroku Container Registry
+
+```bash
+$ heroku login
+$ heroku container:login
+$ heroku container:push web
+$ heroku container:release web
+```
+
+### Howto
+
+https://docs.streamlit.io/

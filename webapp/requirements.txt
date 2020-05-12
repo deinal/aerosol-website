@@ -5,4 +5,6 @@ Pillow
 xarray
 cfgrib
 eccodes-python
-scipy
+scikit-learn
+xgboost
+numpy
