@@ -6,8 +6,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 
 def split_data(X, y):
-    test_size = 0.25
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=7)
     return X_train, X_test, y_train, y_test
 
 def xgboost(X_train, y_train):
@@ -52,7 +51,7 @@ def linear_equation(model, predictors, sf=4):
             equation += ' + '
         
         equation += str(np.abs(coefs[i]))
-        equation += '*' + predictors[i]
+        equation += ' \cdot ' + predictors[i]
     
     # adding the intercept
     if intercept < 0:

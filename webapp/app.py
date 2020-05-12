@@ -1,22 +1,6 @@
 import streamlit as st
-import xarray as xr
-import cartopy.crs as ccrs
-import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
-from PIL import Image
-import models
 pd.options.mode.chained_assignment = None
-
-@st.cache(hash_funcs={xr.core.dataset.Dataset: lambda _: None})
-def load_grib():
-    ds = xr.open_dataset('data/data.grib', engine='cfgrib')
-    ds = ds.assign(colog = np.log(ds.co))
-    ds['colog'] = ds.colog.assign_attrs(units = 'log(kg kg**-1)')
-    ds['colog'] = ds.colog.assign_attrs(long_name = 'CO')
-    return ds
-
-ds = load_grib()
 
 @st.cache
 def load_input():
@@ -27,21 +11,7 @@ def load_input():
 
 input_data = load_input()
 
-@st.cache
-def load_train():
-    data = pd.read_csv('data/all_merged.csv')
-    data['colog'] = np.log(data['co'])
-    predictors = ['t', 'colog']
-    target = ['concentration']
-    X = data[predictors]
-    y = data[target]
-    y['concentration'] = np.log(y['concentration'])
-    return X, y
-
-X, y = load_train()
-
 st.title('Global Aerosol Modeling')
-
 
 st.header('Background')
 st.write('Aerosols have been measured to be responsible for a cooling effect in our climate. \
@@ -83,18 +53,7 @@ time = st.selectbox('Choose a time', times)
 time2num = dict(zip(times, (None, 0, 1, 2, 3, 4, 5, 6, 7)))
 value = time2num[time]
 if value != None:
-    fig, (ax1, ax2) = plt.subplots(nrows=2, subplot_kw={'projection': ccrs.Robinson()})
-    fig.subplots_adjust(hspace=0.35)
-
-    ds.t.isel(time=value).plot.contourf(ax=ax1, transform=ccrs.PlateCarree())
-    ax1.set_global()
-    ax1.coastlines()
-
-    ds.colog.isel(time=value).plot.contourf(ax=ax2, transform=ccrs.PlateCarree())
-    ax2.set_global()
-    ax2.coastlines()
-
-    st.pyplot()
+    st.image(f'images/input/{value}.png', use_column_width=True, format='PNG')
 
 st.header('Predict N100 number concentration')
 
@@ -114,38 +73,24 @@ regressor = st.selectbox('Choose a model', regressors)
 
 if regressor != None:
     if value == None:
-        st.write('No input data, select a time above.')
+        st.write('Choose input data by selecting a time above.')
     else:
-        X_train, X_test, y_train, y_test = models.split_data(X, y)
         if regressor == 'Linear Regression':
-            model = models.linear_regression(X_train, y_train)
-            st.latex(models.linear_equation(model, ['T', '\log CO']))
-            r2 = models.score(model, X_test, y_test)
-            st.write(f"R2 score: {r2:.2f}")
+            with open('images/linear_regression/info.txt', 'r') as info:
+                lines = [line for line in info]
+            st.latex(lines[0])
+            st.text(lines[1])
+            st.image(f'images/linear_regression/{value}.png', use_column_width=True, format='PNG')
         elif regressor == 'Random Forest':
-            model = models.randomforest(X_train, y_train)
-            r2 = models.score(model, X_test, y_test)
-            st.write(f"R2 score: {r2:.2f}")
+            with open('images/randomforest/info.txt', 'r') as info:
+                for line in info:
+                    st.text(line)
+            st.image(f'images/randomforest/{value}.png', use_column_width=True, format='PNG')
         else:
-            model = models.xgboost(X_train, y_train)
-            r2 = models.score(model, X_test, y_test)
-            st.write(f"R2 score: {r2:.2f}")
-        
-        # predict on dataset
-        df = ds.isel(time=value).to_dataframe()
-        df['concentration'] = model.predict(df[['t', 'colog']])
-        result = xr.Dataset.from_dataframe(df)
-        result['concentration'] = result.concentration.assign_attrs(units = 'log(cm^-3)')
-        result['concentration'] = result.concentration.assign_attrs(long_name = 'N100')
-        
-        # plot result
-        fig, ax = plt.subplots(nrows=1, subplot_kw={'projection': ccrs.Robinson()})
-        fig.subplots_adjust(hspace=0.35)
-        result.concentration.plot.contourf(ax=ax, transform=ccrs.PlateCarree())
-        ax.set_global()
-        ax.coastlines()
-
-        st.pyplot()
+            with open('images/xgboost/info.txt', 'r') as info:
+                for line in info:
+                    st.text(line)
+            st.image(f'images/xgboost/{value}.png', use_column_width=True, format='PNG')
 
 st.header('Image references')
 

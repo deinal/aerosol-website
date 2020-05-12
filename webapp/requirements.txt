@@ -1,10 +1,2 @@
 streamlit
 pandas
-matplotlib
-Pillow
-xarray
-cfgrib
-eccodes-python
-scikit-learn
-xgboost
-numpy

@@ -1,0 +1,2 @@
+\mathrm{log} N_{100} =  0.05022 \cdot T + 1.5 \cdot \log CO + 15.65
+R2 score: 0.470
